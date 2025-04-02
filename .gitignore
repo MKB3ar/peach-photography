@@ -90,3 +90,4 @@ db.sqlite3
 
 .vscode/
 .venv/
+project_cv_yolo/model
