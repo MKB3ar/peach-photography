@@ -92,3 +92,4 @@ db.sqlite3
 .venv/
 project_cv_yolo/model
 *.sql
+media/
