@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <h1>OpenCV Image Processing</h1>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <label for="photo_id">Выберите фото:</label>
+            <select name="photo_id">
+                {% for photo in photos %}
+                    <option value="{{ photo.id }}">{{ photo.title }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="mask_type">Выберите фильтр:</label>
+            <select name="mask_type">
+                <option value="grayscale">Grayscale</option>
+                <option value="edges">Edges</option>
+                <option value="hsv">HSV</option>
+                <option value="lab">LAB</option>
+                <option value="rgb">RGB</option>
+                <option value="binary">Adaptive Thresholding</option>
+                <option value="gauss">Gaussian Blur</option>
+            </select>
+
+            <button type="submit">Применить фильтр</button>
+        </form>
+
+        {% if original_image %}
+        <div class="images">
+            <div class="image-container">
+                <h3>Оригинальное изображение</h3>
+                {% if original_image %}
+                    <img src="{{ original_image }}" alt="Original Image">
+                {% else %}
+                    <p>Оригинальное изображение не найдено</p>
+                {% endif %}
+            </div>
+        
+            <div class="image-container">
+                <h3>Обработанное изображение</h3>
+                {% if processed_photo %}
+                    <img src="{{ processed_photo }}" alt="Processed Image">
+                {% else %}
+                    <p>Обработанное изображение не найдено</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
