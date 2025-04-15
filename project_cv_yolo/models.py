@@ -29,7 +29,8 @@ class ProcessedPhoto(models.Model):
         PhotoModel, on_delete=models.RESTRICT
     )
     processed_photo = models.ImageField(
-        upload_to='processed_photo/'
+        upload_to='processed_photo/',
+        max_length=255
     )
     mask_type = models.ForeignKey(
         MaskType, on_delete=models.RESTRICT
