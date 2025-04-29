@@ -1,0 +1,127 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peach Photography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'project_cv_yolo/css/welcome_page.css' %}">
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="peach-bg py-6 shadow-md">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-camera-retro text-3xl text-amber-800 mr-3"></i>
+                <h1 class="text-2xl font-bold text-amber-900">Peach Photography</h1>
+            </div>
+            <nav class="hidden md:block">
+            </nav>
+            <button class="md:hidden text-amber-900">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center py-12 px-4">
+        <div class="text-center max-w-4xl mx-auto">
+            <!-- Welcome Section -->
+            <section class="mb-16">
+                <h2 class="welcome-text text-5xl md:text-6xl font-bold text-amber-900 mb-6">Добро пожаловать на страничку!</h2>
+                <p class="text-xl text-amber-800 mb-8">Данный проект был сделан в целях научиться работать с Django фреймворком, а также с моделью YOLO и CV2</p>
+                <div class="w-24 h-1 bg-amber-700 mx-auto mb-8"></div>
+                <p class="text-lg text-amber-700 max-w-2xl mx-auto">Если оно не работает, могу лишь пожелать удачи</p>
+            </section>
+
+            <!-- Menu Buttons -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Gallery Button -->
+                <div class="peach-light rounded-xl p-6 shadow-lg transition-all duration-300 btn-hover">
+                    <div class="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-images text-3xl text-amber-700"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-amber-900 mb-2">Галлерея</h3>
+                    <p class="text-amber-700 mb-4">Просмотри все фотографии, которые загружал и изменял</p>
+                    <button class="peach-dark text-amber-900 font-medium py-2 px-6 rounded-full hover:bg-amber-700 hover:text-white transition-colors">
+                        Перейти
+                    </button>
+                </div>
+
+                <!-- Photo Posting Button -->
+                <div class="peach-light rounded-xl p-6 shadow-lg transition-all duration-300 btn-hover">
+                    <div class="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-upload text-3xl text-amber-700"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-amber-900 mb-2">Загрузка фото</h3>
+                    <p class="text-amber-700 mb-4">Загрузи свои фотографии и сохрани их в БД</p>
+                    <button class="peach-dark text-amber-900 font-medium py-2 px-6 rounded-full hover:bg-amber-700 hover:text-white transition-colors" type="button" onclick="location.href='{% url 'upload_photo' %}'">
+                        Перейти
+                    </button>
+                </div>
+
+                <!-- Photo Editing Button -->
+                <div class="peach-light rounded-xl p-6 shadow-lg transition-all duration-300 btn-hover">
+                    <div class="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-sliders-h text-3xl text-amber-700"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-amber-900 mb-2">Изменение фотографий</h3>
+                    <p class="text-amber-700 mb-4">Примени фильтры из CV2 над загруженными фотографиями</p>
+                    <button class="peach-dark text-amber-900 font-medium py-2 px-6 rounded-full hover:bg-amber-700 hover:text-white transition-colors" type="button" onclick="location.href='{% url 'photo_mask' %}'">
+                        Перейти
+                    </button>
+                </div>
+
+                <!-- YOLO Button -->
+                <div class="peach-light rounded-xl p-6 shadow-lg transition-all duration-300 btn-hover">
+                    <div class="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-eye text-3xl text-amber-700"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-amber-900 mb-2">YOLO</h3>
+                    <p class="text-amber-700 mb-4">Поработай с мощной сетью YOLO 11, чтобы испытать всю мощь VideoProcessing</p>
+                    <button class="peach-dark text-amber-900 font-medium py-2 px-6 rounded-full hover:bg-amber-700 hover:text-white transition-colors">
+                        Попробовать
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="peach-bg py-6 text-center">
+        <div class="container mx-auto px-4">
+            <p class="text-amber-900">&copy; MKB3ar for testing purpose</p>
+        </div>
+    </footer>
+
+    <script>
+        // Simple mobile menu toggle
+        document.querySelector('button').addEventListener('click', function() {
+            const nav = document.querySelector('nav');
+            nav.classList.toggle('hidden');
+            nav.classList.toggle('block');
+            nav.classList.toggle('absolute');
+            nav.classList.toggle('top-20');
+            nav.classList.toggle('right-4');
+            nav.classList.toggle('bg-white');
+            nav.classList.toggle('p-4');
+            nav.classList.toggle('rounded-lg');
+            nav.classList.toggle('shadow-lg');
+        });
+
+        // Button hover effects
+        const buttons = document.querySelectorAll('.btn-hover');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
