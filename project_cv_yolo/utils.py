@@ -34,6 +34,8 @@ def apply_mask(image_path, mask_type):
         result = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     elif mask_type == 'lab':
         result = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    elif mask_type == 'luv':
+        result = cv2.cvtColor(image, cv2.COLOR_BGR2LUV)
     elif mask_type == 'rgb':
         result = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     elif mask_type == 'binary':
