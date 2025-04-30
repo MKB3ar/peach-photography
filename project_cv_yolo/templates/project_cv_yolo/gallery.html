@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peach Photography | Галерея</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'project_cv_yolo/css/welcome_page.css' %}">
+    <style>
+        .thumbnail {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            align-self: center;
+            border: 2px solid transparent;
+        }
+        .thumbnail:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            border-color: #f59e0b;
+        }
+        .main-image {
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .carousel-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-amber-50 font-poppins">
+
+<!-- Header -->
+<header class="peach-bg py-6 shadow-md">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+        <div class="flex items-center">
+            <a href="/" class="flex items-center mr-4 text-amber-900 hover:text-amber-700 transition-colors">
+                <i class="fas fa-arrow-left text-xl mr-2"></i>
+            </a>
+            <i class="fas fa-camera-retro text-3xl text-amber-800 mr-3"></i>
+            <h1 class="text-2xl font-bold text-amber-900">Peach Photography</h1>
+        </div>
+        <button class="md:hidden text-amber-900">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-grow flex flex-col md:flex-row p-4 md:p-8 gap-6">
+    <!-- Left Gallery Thumbnails -->
+    <div class="w-full md:w-1/4 peach-light rounded-lg p-4 shadow-md">
+        <h2 class="text-xl font-semibold text-amber-900 mb-4">Все фотографии</h2>
+        <div class="carousel-container">
+            {% for photo in photos %}
+            <div class="thumbnail-wrapper">
+                <img src="{{ photo.image.url }}"
+                     alt="{{ photo.title }}"
+                     class="thumbnail"
+                     data-id="{{ photo.id }}"
+                     data-title="{{ photo.title }}"
+                     data-time="{{ photo.uploaded_at|date:'d.m.Y H:i' }}"
+                     data-full-url="{{ photo.image.url }}">
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+
+    <!-- Center Image Preview -->
+    <div class="w-full md:w-1/2 flex flex-col items-center justify-start">
+        <h2 class="text-xl font-semibold text-amber-900 mb-4">Предпросмотр</h2>
+        <img id="main-image" class="main-image mb-4" src="" alt="">
+        <button id="delete-btn" class="hidden peach-dark text-amber-900 font-medium py-2 px-6 rounded-full hover:bg-amber-700 hover:text-white transition-colors">
+            <i class="fas fa-trash mr-2"></i> Удалить
+        </button>
+        <div id="form-message" class="form-message hidden mt-4 text-center"></div>
+    </div>
+
+    <!-- Right Info Panel -->
+    <div class="w-full md:w-1/4 peach-light rounded-lg p-4 shadow-md">
+        <h2 class="text-xl font-semibold text-amber-900 mb-4">Информация о фото</h2>
+        <p><strong>Название:</strong> <span id="photo-title"></span></p>
+        <p><strong>Дата загрузки:</strong> <span id="photo-time"></span></p>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="peach-bg py-6 text-center">
+    <div class="container mx-auto px-4">
+        <p class="text-amber-900">&copy; MKB3ar for testing purpose</p>
+    </div>
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const mainImage = document.getElementById('main-image');
+        const photoTitle = document.getElementById('photo-title');
+        const photoTime = document.getElementById('photo-time');
+        const deleteBtn = document.getElementById('delete-btn');
+        const formMessage = document.getElementById('form-message');
+
+        let selectedPhotoId = null;
+
+        // Обработчик клика по миниатюре
+        thumbnails.forEach(thumbnail => {
+            thumbnail.addEventListener('click', function () {
+                const src = this.dataset.fullUrl;
+                const title = this.dataset.title;
+                const time = this.dataset.time;
+                selectedPhotoId = this.dataset.id;
+
+                mainImage.src = src;
+                photoTitle.textContent = title;
+                photoTime.textContent = time;
+                deleteBtn.classList.remove('hidden');
+                formMessage.classList.add('hidden');
+            });
+        });
+
+        // Удаление фотографии
+        deleteBtn.addEventListener('click', async function () {
+            if (!selectedPhotoId) return;
+
+            const csrftoken = document.querySelector('[name=csrfmiddlewareexempt]')?.value;
+
+            try {
+                const response = await fetch(`/gallery/delete/${selectedPhotoId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ confirm: true })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    formMessage.textContent = '✅ Фотография успешно удалена!';
+                    formMessage.className = 'form-message text-green-600';
+                    document.querySelector(`.thumbnail[data-id="${selectedPhotoId}"]`).closest('.thumbnail-wrapper').remove();
+                    mainImage.src = '';
+                    photoTitle.textContent = '';
+                    photoTime.textContent = '';
+                    deleteBtn.classList.add('hidden');
+                    selectedPhotoId = null;
+                } else {
+                    formMessage.textContent = `❌ Ошибка: ${result.message}`;
+                    formMessage.className = 'form-message text-red-600';
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                formMessage.textContent = '⚠️ Произошла сетевая ошибка.';
+                formMessage.className = 'form-message text-red-600';
+            }
+        });
+    });
+</script>
+</body>
+</html>
