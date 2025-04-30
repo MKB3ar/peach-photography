@@ -1,6 +1,7 @@
 import os
 import cv2
 
+from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
 from django.shortcuts import render
@@ -14,9 +15,12 @@ from .forms import PhotoModelForm
 from .utils import apply_mask
 # Create your views here.
 
-camera = cv2.VideoCapture(0)
-model = YOLO(model="project_cv_yolo/model/yolo11n.pt")
+# Глобальные переменные
 last_detections = {}
+current_video_path = None
+
+# Загрузка модели один раз при запуске сервера
+model = YOLO("project_cv_yolo/model/yolo11n.pt")
 
 @csrf_exempt
 def upload_photo(request):
@@ -96,53 +100,89 @@ def photo_mask(request):
 
     return render(request, 'project_cv_yolo/test_opencv.html', {'photos': photos})  # Возвращаем список фото
 
+def welcome(request):
+    return render(request, 'project_cv_yolo/welcome_page.html')
+
+def gallery_view(request):
+    photos = PhotoModel.objects.all().order_by('-uploaded_at')
+    return render(request, 'project_cv_yolo/gallery.html', {'photos': photos})
+
+@csrf_exempt
+def delete_photo(request, photo_id):
+    try:
+        photo = PhotoModel.objects.get(id=photo_id)
+        photo.delete()
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Фотография успешно удалена.',
+            'photo_id': photo_id
+        })
+    except PhotoModel.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Фотография не найдена.'
+        }, status=404)
+
+def video(request):
+    return render(request, "project_cv_yolo/video.html")
+
+
+def upload_video(request):
+    global current_video_path, last_detections
+    last_detections.clear()
+
+    if request.method == "POST" and request.FILES.get("video"):
+        video_file = request.FILES["video"]
+        file_name = default_storage.save(f"videos/{video_file.name}", video_file)
+
+        # Сохраняем путь к видео
+        current_video_path = os.path.join(settings.MEDIA_ROOT, file_name)
+
+        return render(request, "project_cv_yolo/video.html")
+    return render(request, "project_cv_yolo/video.html")
+
+
 def video_feed(request):
     return StreamingHttpResponse(gen_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
 
+
 def gen_frames():
+    global current_video_path, last_detections
+    cap = cv2.VideoCapture(current_video_path)
+    last_detections.clear()
+
     while True:
-        success, frame = camera.read()
+        success, frame = cap.read()
         if not success:
             break
-        result = model(frame,
-                       verbose=False)
-        result_frame = result[0].plot()  # This returns an image with the bounding boxes drawn
-        
-        # Извлекаем классы обнаруженных объектов
-        boxes = result[0].boxes
 
-        class_ids = boxes.cls.cpu().numpy().astype(int)
-        confidences = boxes.conf.cpu().numpy()
+        results = model(frame, verbose=False)
+        annotated_frame = results[0].plot()
 
-        class_names = model.names  # Словарь: id -> имя класса
+        # Извлечение классов
+        boxes = results[0].boxes
+        cls_ids = boxes.cls.cpu().numpy().astype(int)
+        confs = boxes.conf.cpu().numpy()
+        class_names = model.names
 
-        # Собираем словарь: имя класса -> список вероятностей
-        detections = {}
-        for cls_id, conf in zip(class_ids, confidences):
+        for cls_id, conf in zip(cls_ids, confs):
             name = class_names[cls_id]
             if name not in last_detections:
                 last_detections[name] = []
             last_detections[name].append(conf * 100)
 
-
-        _, buffer = cv2.imencode('.jpg', result_frame)
-        frame = buffer.tobytes()
+        _, buffer = cv2.imencode('.jpg', annotated_frame)
+        frame_bytes = buffer.tobytes()
         yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-    camera.release()
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
-def video(request):
-    print("=== ЗАПУСКАЕТСЯ view 'video' ===")
-    return render(request, 'project_cv_yolo/video.html')
+    cap.release()
 
 
 def detections_api(request):
     global last_detections
     response_data = {
-        name: round(sum(confs) / len(confs), 1)
+        name: round(max(confs), 1)
         for name, confs in last_detections.items()
     }
     return JsonResponse(response_data)
-
-def welcome(request):
-    return render(request, 'project_cv_yolo/welcome_page.html')
