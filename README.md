@@ -59,7 +59,10 @@ docker-compose up --build
 ### 4. Не забудь применить все миграции из Django
 ```bash
 Выйди из контейнера, после сборки (Ctrl+Z)
-Далее примени команду docker-compose run web python manage.py migrate
+docker-compose run web python manage.py makemigrations
+docker-compose run web python manage.py migrate
+## НЕ ЗАБУДЬ ВНЕСТИ ИЗМЕНЕНИЯ В ДОБАВЛЕНИЕ ПОЛЕЙ В ПОСТГРЮ
+INSERT INTO project_cv_yolo_masktype (maskname) VALUES ('grayscale'), ('edges'), ('hsv'), ('lab'), ('luv'), ('rgb'), ('binary'), ('gauss');
 ```
 
 ### 5. После этого запусти проект и перейди в бразуере на http://localhost:8000 (или другой порт, который указан в Dockerfile)
