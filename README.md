@@ -67,14 +67,14 @@ docker-compose run web python manage.py migrate
 К сожалению, в силу неопытности, для работы проекта необходимо вручную внести данные в одну из таблиц БД.
 Для этого в терминале необходимо подключиться к БД проекта
 ```bash
-docker exec -it [ID-конейнера с проектом] psql -U [Пользователь БД] [Название БД].
+docker exec -it [CONTAINER_ID] psql -U [POSTGRES_USER] [POSTGRES_NAME].
 ```
 Далее в открывшемся окне необходимо ввести следующую команду:
 ```bash
 INSERT INTO project_cv_yolo_masktype (maskname) VALUES ('grayscale'), ('edges'), ('hsv'), ('lab'), ('luv'), ('rgb'), ('binary'), ('gauss');
 ```
 
-### 6. После этого запусти проект и перейди в бразуере на http://localhost:8000 (или другой порт, который указан в Dockerfile)
+### 6. После этого запусти проект и перейди в бразуере на http://127.0.0.1:8000 (или другой порт, который указан в Dockerfile)
 ```bash
 docker-compose up
 ```
