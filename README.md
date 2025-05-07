@@ -61,11 +61,20 @@ docker-compose up --build
 Выйди из контейнера, после сборки (Ctrl+Z)
 docker-compose run web python manage.py makemigrations
 docker-compose run web python manage.py migrate
-## НЕ ЗАБУДЬ ВНЕСТИ ИЗМЕНЕНИЯ В ДОБАВЛЕНИЕ ПОЛЕЙ В ПОСТГРЮ
+```
+
+### 5. Добавить необходимы поля в POSTGRES
+К сожалению, в силу неопытности, для работы проекта необходимо вручную внести данные в одну из таблиц БД.
+Для этого в терминале необходимо подключиться к БД проекта
+```bash
+docker exec -it [ID-конейнера с проектом] psql -U [Пользователь БД] [Название БД].
+```
+Далее в открывшемся окне необходимо ввести следующую команду:
+```bash
 INSERT INTO project_cv_yolo_masktype (maskname) VALUES ('grayscale'), ('edges'), ('hsv'), ('lab'), ('luv'), ('rgb'), ('binary'), ('gauss');
 ```
 
-### 5. После этого запусти проект и перейди в бразуере на http://localhost:8000 (или другой порт, который указан в Dockerfile)
+### 6. После этого запусти проект и перейди в бразуере на http://localhost:8000 (или другой порт, который указан в Dockerfile)
 ```bash
 docker-compose up
 ```
