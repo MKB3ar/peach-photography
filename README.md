@@ -38,7 +38,7 @@
 
 ### 1. Клонируй репозиторий:
 ```bash
-git clone https://github.com/YOUR_USERNAME/peach-photography.git
+git clone https://github.com/MKB3ar/peach-photography.git
 cd peach-photography
 ```
 
